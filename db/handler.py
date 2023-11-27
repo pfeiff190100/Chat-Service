@@ -15,3 +15,6 @@ def add_message(sender_id, recipient_id, body):
     msg = Message(sender_id=sender_id, recipient_id=recipient_id, body=body)
     db.session.add(msg)
     db.session.commit()
+
+def get_all_messages(sender_id, recipient_id):
+    return Message.query.filter_by(sender_id=sender_id, recipient_id=recipient_id).all()

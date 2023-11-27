@@ -3,8 +3,6 @@ Basic Implementation for a Chat-Service using Flask
 
 # Usage
 
-## API Documentation
-
 ### User Registration
 - URL: /register
 - Method: POST
