@@ -46,8 +46,8 @@ def create_app(config_object):
         data = request.get_json()
         if 'recipient' not in data or 'body' not in data:
             return jsonify({'message': 'Bad Request', 'error': 'Missing recipient or body'}), 400
-        if  len(data['body']) > 500:
-            return jsonify({'message': 'Bad Request', 'error': 'Invalid body lengh'}), 400
+        if  len(data['body']) > 500 or len(data['body']) == 0 or data['body'] == "":
+            return jsonify({'message': 'Bad Request', 'error': 'Invalid body'}), 400
 
         recipient = get_user(data['recipient'])
         if recipient:

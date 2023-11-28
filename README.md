@@ -1,7 +1,7 @@
 # Chat-Service
 Basic Implementation for a Chat-Service using Flask
 
-# Usage
+## Usage
 
 ### User Registration
 - URL: /register
@@ -10,8 +10,11 @@ Basic Implementation for a Chat-Service using Flask
     - username: string
     - password: string
 - Success Response:
-    - Code: 200
+    - Code: 201
     - Content: {'message': 'Registered successfully'}
+- Error Response:
+    - Code: 400
+    - Content: {'message': 'Bad Request', 'error': 'Missing username or password'}
 
 ### User Login
 - URL: /login
@@ -23,8 +26,10 @@ Basic Implementation for a Chat-Service using Flask
     - Code: 200
     - Content: {'message': 'Logged in successfully'}
 - Error Response:
-    - Code: 200
-    - Content: {'message': 'Invalid credentials'}
+    - Code: 400
+    - Content: {'message': 'Bad Request', 'error': 'Missing username or password'}
+    - Code: 401
+    - Content: {'message': 'Unauthorized', 'error': 'Invalid credentials'}
 
 ### User Logout
 - URL: /logout
@@ -38,10 +43,28 @@ Basic Implementation for a Chat-Service using Flask
 - Method: POST
 - Data Params:
     - recipient: string (username of the recipient)
-    - message: string
+    - body: string
 - Success Response:
-    - Code: 200
+    - Code: 201
     - Content: {'message': 'Message sent'}
 - Error Response:
+    - Code: 400
+    - Content: {'message': 'Bad Request', 'error': 'Missing recipient or body'}
+    - Code: 400
+    - Content: {'message': 'Bad Request', 'error': 'Invalid body'}
+    - Code: 404
+    - Content: {'message': 'Not Found', 'error': 'Recipient not found'}
+
+### Get Messages
+- URL: /get_messages
+- Method: POST
+- Data Params:
+    - recipient: string (username of the recipient)
+- Success Response:
     - Code: 200
-    - Content: {'message': 'Recipient not found'}
+    - Content: {'messages': messages_data, 'message': 'Messages retrieved'}
+- Error Response:
+    - Code: 400
+    - Content: {'message': 'Bad Request', 'error': 'Missing recipient'}
+    - Code: 404
+    - Content: {'message': 'Not Found', 'error': 'Recipient not found'}
