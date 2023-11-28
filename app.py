@@ -53,8 +53,9 @@ def create_app(config_object):
         recipient = get_user(data['recipient'])
         if recipient:
             messages = get_all_messages(current_user.id, recipient.id)
-            messages_data = [{'id': msg.id, 'sender_id': get_user_by_id(msg.sender_id), 
-                              'recipient_id': get_user_by_id(msg.recipient_id), 'body': msg.body} for msg in messages]
+            messages_data = [{'sender': get_user_by_id(msg.sender_id).username, 
+                            'recipient': get_user_by_id(msg.recipient_id).username, 'body': msg.body} 
+                            for msg in messages]
             return jsonify({'messages': messages_data, 'message': 'Messages retrieved'})
         return jsonify({'message': 'Recipient not found'})
     return app

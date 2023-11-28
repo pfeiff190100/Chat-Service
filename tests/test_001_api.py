@@ -87,4 +87,30 @@ def test_get_messages():
     response = client.post("/get_messages", json=get_messages_data)
     messages = response.get_json()["messages"]
 
-    assert any(msg['sender'] == 'User1' and msg['recipient'] == 'User2' and msg['body'] == 'Hello, User2!' for msg in messages)
+    assert response.get_json()["message"] == "Messages retrieved"
+
+    client.post("/logout")
+    client.post("/login", json=test_data2)
+
+    message_data = {"recipient": "User1", "message": "Hello, User1!"}
+    client.post("/send_message", json=message_data)
+
+    get_messages_data = {"recipient": "User1"}
+    response = client.post("/get_messages", json=get_messages_data)
+
+    assert response.get_json()["message"] == "Messages retrieved"
+    messages = response.get_json()["messages"]
+
+    assert messages[0]['sender'] == 'User1' and messages[0]['recipient'] == 'User2' and messages[0]['body'] == 'Hello, User2!'
+    assert messages[1]['sender'] == 'User2' and messages[1]['recipient'] == 'User1' and messages[1]['body'] == 'Hello, User1!'
+
+
+def test_get_messages_to_nonexistent_user():
+    test_data1 = {"username": "User1", "password": "password"}
+    client.post("/register", json=test_data1)
+
+    client.post("/login", json=test_data1)
+
+    get_messages_data = {"recipient": "User2"}
+    response = client.post("/get_messages", json=get_messages_data)
+    assert response.get_json()["message"] == "Recipient not found"
