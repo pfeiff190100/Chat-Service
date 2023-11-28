@@ -18,46 +18,57 @@ def create_app(config_object):
     @app.route('/register', methods=['POST'])
     def register():
         data = request.get_json()
+        if 'username' not in data or 'password' not in data:
+            return jsonify({'message': 'Bad Request', 'error': 'Missing username or password'}), 400
         add_user(data['username'], data['password'])
-        return jsonify({'message': 'Registered successfully'})
+        return jsonify({'message': 'Registered successfully'}), 201
 
     @app.route('/login', methods=['POST'])
     def login():
         data = request.get_json()
+        if 'username' not in data or 'password' not in data:
+            return jsonify({'message': 'Bad Request', 'error': 'Missing username or password'}), 400
         user = get_user(data['username'])
         if user and user.password == data['password']:
             login_user(user)
-            return jsonify({'message': 'Logged in successfully'})
-        return jsonify({'message': 'Invalid credentials'})
+            return jsonify({'message': 'Logged in successfully'}), 200
+        return jsonify({'message': 'Unauthorized', 'error': 'Invalid credentials'}), 401
 
     @app.route('/logout')
     @login_required
     def logout():
         logout_user()
-        return jsonify({'message': 'Logged out successfully'})
+        return jsonify({'message': 'Logged out successfully'}), 200
 
     @app.route('/send_message', methods=['POST'])
     @login_required
     def send_message():
         data = request.get_json()
+        if 'recipient' not in data or 'body' not in data:
+            return jsonify({'message': 'Bad Request', 'error': 'Missing recipient or body'}), 400
+        if  len(data['body']) > 500:
+            return jsonify({'message': 'Bad Request', 'error': 'Invalid body lengh'}), 400
+
         recipient = get_user(data['recipient'])
         if recipient:
-            add_message(current_user.id, recipient.id, data['message'])
-            return jsonify({'message': 'Message sent'})
-        return jsonify({'message': 'Recipient not found'})
+            add_message(current_user.id, recipient.id, data['body'])
+            return jsonify({'message': 'Message sent'}), 201
+        return jsonify({'message': 'Not Found', 'error': 'Recipient not found'}), 404
 
     @app.route('/get_messages', methods=['POST'])
     @login_required
     def get_messages():
         data = request.get_json()
+        if 'recipient' not in data:
+            return jsonify({'message': 'Bad Request', 'error': 'Missing recipient'}), 400
         recipient = get_user(data['recipient'])
         if recipient:
             messages = get_all_messages(current_user.id, recipient.id)
             messages_data = [{'sender': get_user_by_id(msg.sender_id).username, 
                             'recipient': get_user_by_id(msg.recipient_id).username, 'body': msg.body} 
                             for msg in messages]
-            return jsonify({'messages': messages_data, 'message': 'Messages retrieved'})
-        return jsonify({'message': 'Recipient not found'})
+            return jsonify({'messages': messages_data, 'message': 'Messages retrieved'}), 200
+        return jsonify({'message': 'Not Found', 'error': 'Recipient not found'}), 404
     return app
 
 if __name__ == '__main__':

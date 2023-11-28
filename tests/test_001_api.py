@@ -26,7 +26,9 @@ def test_register():
     test_data2 = {"username": "User2", "password": "password"}
     response2 = client.post("/register", json=test_data2)
 
+    assert response1.status_code == 201
     assert response1.get_json()["message"] == "Registered successfully"
+    assert response2.status_code == 201
     assert response2.get_json()["message"] == "Registered successfully"
 
 def test_login():
@@ -34,6 +36,7 @@ def test_login():
     client.post("/register", json=test_data)
 
     response = client.post("/login", json=test_data)
+    assert response.status_code == 200
     assert response.get_json()["message"] == "Logged in successfully"
 
 def test_invalid_login():
@@ -42,7 +45,8 @@ def test_invalid_login():
 
     test_data["password"] = "wrongpass"
     response = client.post("/login", json=test_data)
-    assert response.get_json()["message"] == "Invalid credentials"
+    assert response.status_code == 401
+    assert response.get_json()["message"] == "Unauthorized"
 
 def test_logout():
     test_data = {"username": "User1", "password": "password"}
@@ -50,6 +54,7 @@ def test_logout():
     client.post("/login", json=test_data)
 
     response = client.get("/logout")
+    assert response.status_code == 200
     assert response.get_json()["message"] == "Logged out successfully"
 
 def test_send_message():
@@ -60,8 +65,9 @@ def test_send_message():
 
     client.post("login", json=test_data1)
 
-    message_data = {"recipient": "User2", "message": "Hello, User2!"}
+    message_data = {"recipient": "User2", "body": "Hello, User2!"}
     response = client.post("/send_message", json=message_data)
+    assert response.status_code == 201
     assert response.get_json()["message"] == "Message sent"
 
 def test_send_message_to_nonexistent_user():
@@ -69,9 +75,10 @@ def test_send_message_to_nonexistent_user():
     client.post("/register", json=test_data)
     client.post("/login", json=test_data)
 
-    message_data = {"recipient": "NonexistentUser", "message": "Hello!"}
+    message_data = {"recipient": "NonexistentUser", "body": "Hello!"}
     response = client.post("/send_message", json=message_data)
-    assert response.get_json()["message"] == "Recipient not found"
+    assert response.status_code == 404
+    assert response.get_json()["message"] == "Not Found"
 
 def test_get_messages():
     test_data1 = {"username": "User1", "password": "password"}
@@ -80,24 +87,26 @@ def test_get_messages():
     client.post("/register", json=test_data2)
 
     client.post("/login", json=test_data1)
-    message_data = {"recipient": "User2", "message": "Hello, User2!"}
+    message_data = {"recipient": "User2", "body": "Hello, User2!"}
     client.post("/send_message", json=message_data)
 
     get_messages_data = {"recipient": "User2"}
     response = client.post("/get_messages", json=get_messages_data)
     messages = response.get_json()["messages"]
 
+    assert response.status_code == 200
     assert response.get_json()["message"] == "Messages retrieved"
 
     client.post("/logout")
     client.post("/login", json=test_data2)
 
-    message_data = {"recipient": "User1", "message": "Hello, User1!"}
+    message_data = {"recipient": "User1", "body": "Hello, User1!"}
     client.post("/send_message", json=message_data)
 
     get_messages_data = {"recipient": "User1"}
     response = client.post("/get_messages", json=get_messages_data)
 
+    assert response.status_code == 200
     assert response.get_json()["message"] == "Messages retrieved"
     messages = response.get_json()["messages"]
 
@@ -113,4 +122,6 @@ def test_get_messages_to_nonexistent_user():
 
     get_messages_data = {"recipient": "User2"}
     response = client.post("/get_messages", json=get_messages_data)
-    assert response.get_json()["message"] == "Recipient not found"
+    assert response.status_code == 404
+    assert response.get_json()["message"] == "Not Found"
+
