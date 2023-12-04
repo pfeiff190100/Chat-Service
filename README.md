@@ -39,6 +39,22 @@ setup by running  ```pip install -r requirements.txt```
     - Code: 200
     - Content: {'message': 'Logged out successfully'}
 
+### Check User
+- URL: /checkuser
+- Method: Post
+- Data Params:
+    - username: string (username which is checked)
+- Success Response:
+    - When the user exists
+        - Code: 200
+        - Content: {'message': 'True'}
+    - When the user doesn't exists
+        - Code: 200
+        - Content: {'message': 'False'}
+- Error Response:
+    - Code: 400
+    - Content: {'message': 'Bad Request', 'error': 'Missing username'}
+
 ### Send Message
 - URL: /send_message
 - Method: POST

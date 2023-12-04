@@ -1,7 +1,11 @@
-from flask import Flask, request, jsonify
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask import Flask, jsonify, make_response, request, session
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
+
+from db.handler import add_message, add_user, get_all_messages, get_user
+from db.handler import load_user as get_user_by_id
 from db.model import db
-from db.handler import add_user, get_user, add_message, get_all_messages, load_user as get_user_by_id
+
 
 def create_app(config_object):
     app = Flask(__name__)
@@ -39,6 +43,17 @@ def create_app(config_object):
     def logout():
         logout_user()
         return jsonify({'message': 'Logged out successfully'}), 200
+
+    @app.route('/checkuser', methods=['POST'])
+    @login_required
+    def checkuser():
+        data = request.get_json()
+        if 'username' not in data:
+            return jsonify({'message': 'Bad Request', 'error': 'Missing username'}), 400
+        user = get_user(data['username'])
+        if user is not []:
+            return jsonify({'message': 'True'}), 200
+        return jsonify({'message': 'False',}), 200
 
     @app.route('/send_message', methods=['POST'])
     @login_required
