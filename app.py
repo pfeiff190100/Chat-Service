@@ -64,7 +64,6 @@ def create_app(config_object):
         return jsonify({'message': 'Unauthorized', 'error': 'Invalid credentials'}), 401
 
     @app.route('/logout')
-    @login_required
     @token_required
     def logout():
         logout_user()
